@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import API from '../services/api';
 import { Link } from 'react-router-dom';
+import EmployeeNavbar from '../components/EmployeeNavbar';
 
 export default function Dashboard() {
   const [surveys, setSurveys] = useState([]);
@@ -20,38 +21,32 @@ export default function Dashboard() {
     }
   };
 
+  const name = localStorage.getItem('name');
+  const role = localStorage.getItem('role');
+  const department = localStorage.getItem('department');
+
   return (
     <div>
       {/* Navbar */}
-      <nav className="bg-gray-800 text-white px-6 py-4 flex justify-between items-center">
-        <h1 className="text-xl font-bold">Employee Dashboard</h1>
-        <div className="flex gap-4">
-          <Link
-            to="/training-request"
-            className="bg-green-500 px-4 py-2 rounded hover:bg-green-600"
-          >
-            Training Request
-          </Link>
-          <button
-            onClick={fetchSurveys}
-            className="bg-blue-500 px-4 py-2 rounded hover:bg-blue-600"
-          >
-            View Assigned Surveys
-          </button>
-        </div>
-      </nav>
+      <EmployeeNavbar fetchSurveys={fetchSurveys} />
 
-      {/* Main Content */}
-      <div className="max-w-3xl mx-auto p-6">
+      {/* Greeting */}
+      <div className="max-w-5xl mx-auto p-6">
+        <h2 className="text-lg text-gray-700 mb-4">
+          Welcome, <strong>{name}</strong> | Role: <strong>{role}</strong> | Department: <strong>{department}</strong>
+        </h2>
+
+        {/* Survey Loading Message */}
         {loading && (
-          <div className="text-center text-gray-500">Loading surveys...</div>
+          <div className="text-center text-gray-500">Loading feedback forms...</div>
         )}
 
+        {/* Assigned Surveys */}
         {showSurveys && !loading && (
           <>
-            <h2 className="text-2xl font-semibold mb-4">Assigned Surveys</h2>
+            <h2 className="text-2xl font-semibold mb-4">Assigned Feedback Forms</h2>
             {surveys.length === 0 ? (
-              <p className="text-center text-gray-500">No surveys assigned to you yet.</p>
+              <p className="text-center text-gray-500">No forms assigned to you yet.</p>
             ) : (
               <ul className="space-y-4">
                 {surveys.map((survey) => (

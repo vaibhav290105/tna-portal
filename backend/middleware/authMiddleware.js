@@ -1,13 +1,16 @@
 const jwt = require('jsonwebtoken');
+const User = require('../models/User');
 
-const authMiddleware = (req, res, next) => {
+const authMiddleware = async (req, res, next) => {
   const token = req.header('Authorization');
   if (!token) return res.status(401).send('Access Denied');
 
   try {
-    const verified = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = verified;
-    
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.id); // fetch full user from DB
+
+    if (!user) return res.status(401).send('User not found');
+    req.user = user; // assign full user
     next();
   } catch (err) {
     res.status(400).send('Invalid Token');
@@ -15,3 +18,4 @@ const authMiddleware = (req, res, next) => {
 };
 
 module.exports = authMiddleware;
+

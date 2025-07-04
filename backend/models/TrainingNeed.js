@@ -5,40 +5,47 @@ const TrainingNeedSchema = new mongoose.Schema({
   department: String,
  
   
-  // General Training Needs
+  
   generalSkills: String,
   toolsTraining: String,
   softSkills: String,
 
-  // Technical Skill Assessment
+
   confidenceLevel: String,
   technicalSkills: String,
   dataTraining: String,
 
-  // Role-Specific Development
+  
   roleChallenges: String,
   efficiencyTraining: String,
   certifications: String,
 
-  // Career Progression & Aspirations
+
   careerGoals: String,
   careerTraining: String,
 
-  // Training Format Preferences
+  
   trainingFormat: String,
   trainingDuration: String,
   learningPreference: String,
 
-  // Feedback on Past Trainings
+
   pastTraining: String,
   pastTrainingFeedback: String,
   trainingImprovement: String,
 
-  // Multiple Choice
+  
   areaNeed: String,
   trainingFrequency: String,
 
-  status: { type: String, default: 'Pending' },
+  status: {
+  type: String,
+  enum: ['Pending_Manager', 'Rejected_By_Manager', 'Approved_By_Manager', 'Approved_By_Admin', 'Rejected_By_Admin'],
+  default: 'Pending_Manager'
+},
+submittedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+reviewedByManager: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+reviewedByAdmin: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
 }, { timestamps: true });
 
 module.exports = mongoose.model('TrainingNeed', TrainingNeedSchema);

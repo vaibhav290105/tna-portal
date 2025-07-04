@@ -13,7 +13,6 @@ export default function AdminPanel() {
   const [trainingRequests, setTrainingRequests] = useState([]);
   const [selectedRequest, setSelectedRequest] = useState(null);
 
-  // Load users for survey assignment
   useEffect(() => {
     if (activeTab === 'survey') {
       API.get('/auth/users')
@@ -25,7 +24,6 @@ export default function AdminPanel() {
     }
   }, [activeTab]);
 
-  // Load surveys
   useEffect(() => {
     if (activeTab === 'survey') {
       API.get('/survey/created')
@@ -34,7 +32,6 @@ export default function AdminPanel() {
     }
   }, [success, activeTab]);
 
-  // Load training requests
   useEffect(() => {
     if (activeTab === 'training') {
       API.get('/training-request/all')
@@ -42,7 +39,18 @@ export default function AdminPanel() {
         .catch(() => alert('Failed to fetch training requests'));
     }
   }, [activeTab]);
-  
+
+  const updateStatus = async (id, status) => {
+    try {
+      await API.put(`/training-request/update-status/${id}`, { status });
+      const updated = trainingRequests.map((r) =>
+        r._id === id ? { ...r, status } : r
+      );
+      setTrainingRequests(updated);
+    } catch (err) {
+      alert('Failed to update status');
+    }
+  };
 
   const addQuestion = () => setQuestions([...questions, '']);
   const updateQuestion = (index, value) => {
@@ -79,21 +87,16 @@ export default function AdminPanel() {
     <div className="max-w-6xl mx-auto p-6">
       <h2 className="text-3xl font-bold mb-6 text-center">Admin Panel</h2>
 
-      {/* Tab Buttons */}
       <div className="flex justify-center mb-8 gap-6">
         <button
           onClick={() => setActiveTab('survey')}
-          className={`px-5 py-2 rounded text-white ${
-            activeTab === 'survey' ? 'bg-blue-600' : 'bg-gray-400'
-          }`}
+          className={`px-5 py-2 rounded text-white ${activeTab === 'survey' ? 'bg-blue-600' : 'bg-gray-400'}`}
         >
-          📋 Manage Surveys
+          📋 Manage Feedback Forms
         </button>
         <button
           onClick={() => setActiveTab('training')}
-          className={`px-5 py-2 rounded text-white ${
-            activeTab === 'training' ? 'bg-green-600' : 'bg-gray-400'
-          }`}
+          className={`px-5 py-2 rounded text-white ${activeTab === 'training' ? 'bg-green-600' : 'bg-gray-400'}`}
         >
           📝 View Training Requests
         </button>
@@ -110,7 +113,7 @@ export default function AdminPanel() {
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="Survey Title"
+            placeholder="Form Title"
             className="w-full border p-2 mb-4 rounded"
           />
           {questions.map((q, i) => (
@@ -145,27 +148,21 @@ export default function AdminPanel() {
             onClick={createSurvey}
             className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded"
           >
-            Create Survey
+            Create Form
           </button>
 
           <hr className="my-8" />
-          <h2 className="text-2xl font-semibold mb-4">Created Surveys</h2>
+          <h2 className="text-2xl font-semibold mb-4">Created Feedback Forms</h2>
           <ul className="space-y-3">
             {surveys.map((survey) => (
-              <li
-                key={survey._id}
-                className="border p-3 rounded flex justify-between items-center"
-              >
+              <li key={survey._id} className="border p-3 rounded flex justify-between items-center">
                 <div>
                   <div className="text-lg font-medium text-gray-800">{survey.title}</div>
                   <div className="text-sm text-gray-600">
                     Assigned: {survey.assignedTo?.length || 0} | Responses: {survey.responseCount || 0}
                   </div>
                 </div>
-                <Link
-                  to={`/survey/${survey._id}/responses`}
-                  className="text-sm text-blue-600 hover:underline"
-                >
+                <Link to={`/survey/${survey._id}/responses`} className="text-sm text-blue-600 hover:underline">
                   View Responses
                 </Link>
               </li>
@@ -174,7 +171,7 @@ export default function AdminPanel() {
         </>
       )}
 
-      {/* Training Requests Section */}
+      
       {activeTab === 'training' && (
         <>
           <h2 className="text-2xl font-semibold mb-4">Employee Training Requests</h2>
@@ -187,8 +184,6 @@ export default function AdminPanel() {
                   <tr className="bg-gray-100 text-left">
                     <th className="px-4 py-2 border">Employee</th>
                     <th className="px-4 py-2 border">Department</th>
-                    <th className="px-4 py-2 border">Career Goals</th>
-                    <th className="px-4 py-2 border">Skills Needed</th>
                     <th className="px-4 py-2 border">Status</th>
                     <th className="px-4 py-2 border">Actions</th>
                   </tr>
@@ -198,15 +193,28 @@ export default function AdminPanel() {
                     <tr key={req._id}>
                       <td className="px-4 py-2 border">{req.user?.name}</td>
                       <td className="px-4 py-2 border">{req.user?.department}</td>
-                      <td className="px-4 py-2 border">{req.careerGoals}</td>
-                      <td className="px-4 py-2 border">{req.generalSkills}</td>
-                      <td className="px-4 py-2 border">{req.status}</td>
                       <td className="px-4 py-2 border">
-                        <button
-                          onClick={() => setSelectedRequest(req)}
-                          className="text-blue-600 underline hover:text-blue-800"
+                        <span
+                          className={`px-2 py-1 rounded font-semibold ${
+                            req.status === 'Approved'
+                              ? 'bg-green-100 text-green-700'
+                              : req.status === 'Rejected'
+                              ? 'bg-red-100 text-red-700'
+                              : 'bg-yellow-100 text-yellow-700'
+                          }`}
                         >
-                          View Details
+                          {req.status}
+                        </span>
+                      </td>
+                      <td className="px-4 py-2 border space-x-2">
+                        <button onClick={() => updateStatus(req._id, 'Approved')} className="bg-green-500 text-white px-2 py-1 rounded">
+                          Approve
+                        </button>
+                        <button onClick={() => updateStatus(req._id, 'Rejected')} className="bg-red-500 text-white px-2 py-1 rounded">
+                          Reject
+                        </button>
+                        <button onClick={() => setSelectedRequest(req)} className="text-blue-600 underline hover:text-blue-800">
+                          View
                         </button>
                       </td>
                     </tr>
@@ -218,7 +226,7 @@ export default function AdminPanel() {
         </>
       )}
 
-      {/* Modal for Training Request Details */}
+      
       {selectedRequest && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
           <div className="bg-white p-6 rounded shadow-lg max-w-4xl w-full overflow-y-auto max-h-[90vh]">

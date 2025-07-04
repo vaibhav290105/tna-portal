@@ -3,7 +3,7 @@ const Response = require('../models/Response');
 const router = express.Router();
 const auth = require('../middleware/authMiddleware');
 
-// Submit survey response
+
 router.post('/submit', auth, async (req, res) => {
   const { surveyId, answers } = req.body;
 

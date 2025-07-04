@@ -8,7 +8,8 @@ export default function Register() {
     email: '',
     password: '',
     role: 'employee',
-    department: ''
+    department: '',
+    location: ''
   });
 
   const navigate = useNavigate();
@@ -29,8 +30,11 @@ export default function Register() {
   };
 
   return (
-    <form onSubmit={register} className="p-4 max-w-md mx-auto">
-      <h2 className="text-2xl font-semibold mb-4">Register</h2>
+    <form
+      onSubmit={register}
+      className="p-6 max-w-lg mx-auto bg-white shadow-md rounded-lg space-y-4"
+    >
+      <h2 className="text-3xl font-bold text-center mb-4 text-gray-700">Register</h2>
 
       <input
         type="text"
@@ -38,7 +42,7 @@ export default function Register() {
         placeholder="Full Name"
         value={formData.name}
         onChange={handleChange}
-        className="block w-full p-2 mb-2 border rounded"
+        className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
         required
       />
 
@@ -48,7 +52,7 @@ export default function Register() {
         placeholder="Email"
         value={formData.email}
         onChange={handleChange}
-        className="block w-full p-2 mb-2 border rounded"
+        className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
         required
       />
 
@@ -58,7 +62,7 @@ export default function Register() {
         placeholder="Password"
         value={formData.password}
         onChange={handleChange}
-        className="block w-full p-2 mb-2 border rounded"
+        className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
         required
       />
 
@@ -66,25 +70,40 @@ export default function Register() {
         name="role"
         value={formData.role}
         onChange={handleChange}
-        className="block w-full p-2 mb-2 border rounded"
+        className="w-full px-4 py-2 border border-gray-300 rounded bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
       >
         <option value="employee">Employee</option>
         <option value="manager">Manager</option>
         <option value="admin">Admin</option>
       </select>
 
-      <input
-        type="text"
+      <select
         name="department"
-        placeholder="Department"
         value={formData.department}
         onChange={handleChange}
-        className="block w-full p-2 mb-4 border rounded"
+        required
+        className="w-full px-4 py-2 border border-gray-300 rounded bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
+      >
+        <option value="">Select Department</option>
+        <option value="HR">HR</option>
+        <option value="Finance">Finance</option>
+        <option value="IT">IT</option>
+        <option value="Operations">Operations</option>
+      </select>
+
+      <input
+        type="text"
+        name="location"
+        placeholder="Enter Location"
+        value={formData.location}
+        onChange={handleChange}
+        required
+        className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
       />
 
       <button
         type="submit"
-        className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
+        className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded transition duration-200"
       >
         Register
       </button>

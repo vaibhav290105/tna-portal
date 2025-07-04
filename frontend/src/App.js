@@ -7,7 +7,8 @@ import SurveyForm from './pages/SurveyForm';
 import AdminPanel from './pages/AdminPanel';
 import AdminResponses from './pages/AdminResponses';
 import TrainingForm from './pages/TrainingForm';
-import TrainingRequests from './pages/TrainingRequests';
+import MyTrainingRequests from './pages/MyTrainingRequests';
+import ManagerPanel from './pages/ManagerPanel';
 
 
 
@@ -22,7 +23,9 @@ function App() {
         <Route path="/admin" element={<AdminPanel />} />
         <Route path="/survey/:id/responses" element={<AdminResponses />} />
         <Route path="/training-request" element={<TrainingForm />} />
-        <Route path="/training/requests" element={<TrainingRequests />} />
+        <Route path="/my-training-requests" element={<MyTrainingRequests />} />
+        <Route path="/manager" element={<ManagerPanel />} />
+
       </Routes>
     </BrowserRouter>
   );
