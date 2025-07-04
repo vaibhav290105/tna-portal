@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import API from '../services/api';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 export default function AdminPanel() {
   const [activeTab, setActiveTab] = useState('survey');
@@ -12,6 +12,8 @@ export default function AdminPanel() {
   const [success, setSuccess] = useState('');
   const [trainingRequests, setTrainingRequests] = useState([]);
   const [selectedRequest, setSelectedRequest] = useState(null);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (activeTab === 'survey') {
@@ -39,18 +41,6 @@ export default function AdminPanel() {
         .catch(() => alert('Failed to fetch training requests'));
     }
   }, [activeTab]);
-
-  const updateStatus = async (id, status) => {
-    try {
-      await API.put(`/training-request/update-status/${id}`, { status });
-      const updated = trainingRequests.map((r) =>
-        r._id === id ? { ...r, status } : r
-      );
-      setTrainingRequests(updated);
-    } catch (err) {
-      alert('Failed to update status');
-    }
-  };
 
   const addQuestion = () => setQuestions([...questions, '']);
   const updateQuestion = (index, value) => {
@@ -83,159 +73,225 @@ export default function AdminPanel() {
     }
   };
 
+  const updateStatus = async (id, decision) => {
+    try {
+      await API.patch(`/training-request/admin-review/${id}`, { decision });
+      const updated = trainingRequests.map((r) =>
+        r._id === id
+          ? {
+              ...r,
+              status:
+                decision === 'approve' ? 'Approved_By_Admin' : 'Rejected_By_Admin',
+            }
+          : r
+      );
+      setTrainingRequests(updated);
+    } catch (err) {
+      alert('Failed to update status');
+    }
+  };
+
+  const formatStatus = (status) => {
+    switch (status) {
+      case 'Approved_By_Admin':
+        return { label: 'Approved by Admin', color: 'bg-green-100 text-green-700' };
+      case 'Rejected_By_Admin':
+        return { label: 'Rejected by Admin', color: 'bg-red-100 text-red-700' };
+      case 'Approved_By_Manager':
+        return { label: 'Approved by Manager', color: 'bg-blue-100 text-blue-700' };
+      case 'Rejected_By_Manager':
+        return { label: 'Rejected by Manager', color: 'bg-orange-100 text-orange-700' };
+      case 'Pending_Manager':
+        return { label: 'Pending Manager Review', color: 'bg-yellow-100 text-yellow-700' };
+      default:
+        return { label: status, color: 'bg-gray-100 text-gray-700' };
+    }
+  };
+
+  const logout = () => {
+    localStorage.clear();
+    navigate('/');
+  };
+
   return (
-    <div className="max-w-6xl mx-auto p-6">
-      <h2 className="text-3xl font-bold mb-6 text-center">Admin Panel</h2>
-
-      <div className="flex justify-center mb-8 gap-6">
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-gray-800 text-white px-6 py-4 flex justify-between items-center shadow-md">
+        <h1 className="text-xl font-bold">Admin Dashboard</h1>
         <button
-          onClick={() => setActiveTab('survey')}
-          className={`px-5 py-2 rounded text-white ${activeTab === 'survey' ? 'bg-blue-600' : 'bg-gray-400'}`}
+          onClick={logout}
+          className="bg-red-500 hover:bg-red-600 px-4 py-2 rounded font-medium"
         >
-          📋 Manage Feedback Forms
+          Logout
         </button>
-        <button
-          onClick={() => setActiveTab('training')}
-          className={`px-5 py-2 rounded text-white ${activeTab === 'training' ? 'bg-green-600' : 'bg-gray-400'}`}
-        >
-          📝 View Training Requests
-        </button>
-      </div>
+      </header>
 
-      {/* Survey Section */}
-      {activeTab === 'survey' && (
-        <>
-          {success && (
-            <div className="bg-green-100 text-green-700 px-4 py-2 rounded mb-4 text-center">
-              {success}
-            </div>
-          )}
-          <input
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Form Title"
-            className="w-full border p-2 mb-4 rounded"
-          />
-          {questions.map((q, i) => (
-            <input
-              key={i}
-              value={q}
-              onChange={(e) => updateQuestion(i, e.target.value)}
-              placeholder={`Question ${i + 1}`}
-              className="w-full border p-2 mb-2 rounded"
-            />
-          ))}
-          <button onClick={addQuestion} className="bg-gray-200 px-3 py-1 rounded mr-3">
-            + Add Question
-          </button>
-
-          <h3 className="text-lg mt-6 mb-2 font-semibold">Assign to Users:</h3>
-          <div className="max-h-40 overflow-y-auto border p-2 mb-6 rounded">
-            {users.map((user) => (
-              <label key={user._id} className="block mb-1">
-                <input
-                  type="checkbox"
-                  checked={selectedUsers.includes(user._id)}
-                  onChange={() => toggleUser(user._id)}
-                  className="mr-2"
-                />
-                {user.name} ({user.role})
-              </label>
-            ))}
+      {/* Tabs */}
+        <div className="max-w-6xl mx-auto p-6">
+          <div className="flex justify-center mb-8 gap-6">
+            <button
+              onClick={() => setActiveTab('survey')}
+              className={`px-5 py-2 rounded text-white ${
+                activeTab === 'survey' ? 'bg-blue-600' : 'bg-gray-400'
+              }`}
+            >
+              📋 Feedback Form Management
+            </button>
+            <button
+              onClick={() => setActiveTab('training')}
+              className={`px-5 py-2 rounded text-white ${
+                activeTab === 'training' ? 'bg-green-600' : 'bg-gray-400'
+              }`}
+            >
+              📝 View Training Requests
+            </button>
           </div>
 
-          <button
-            onClick={createSurvey}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded"
-          >
-            Create Form
-          </button>
-
-          <hr className="my-8" />
-          <h2 className="text-2xl font-semibold mb-4">Created Feedback Forms</h2>
-          <ul className="space-y-3">
-            {surveys.map((survey) => (
-              <li key={survey._id} className="border p-3 rounded flex justify-between items-center">
-                <div>
-                  <div className="text-lg font-medium text-gray-800">{survey.title}</div>
-                  <div className="text-sm text-gray-600">
-                    Assigned: {survey.assignedTo?.length || 0} | Responses: {survey.responseCount || 0}
-                  </div>
+          {/* Survey Tab */}
+          {activeTab === 'survey' && (
+            <>
+              {success && (
+                <div className="bg-green-100 text-green-700 px-4 py-2 rounded mb-4 text-center">
+                  {success}
                 </div>
-                <Link to={`/survey/${survey._id}/responses`} className="text-sm text-blue-600 hover:underline">
-                  View Responses
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </>
-      )}
+              )}
+              <input
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Form Title"
+                className="w-full border p-2 mb-4 rounded"
+              />
+              {questions.map((q, i) => (
+                <input
+                  key={i}
+                  value={q}
+                  onChange={(e) => updateQuestion(i, e.target.value)}
+                  placeholder={`Question ${i + 1}`}
+                  className="w-full border p-2 mb-2 rounded"
+                />
+              ))}
+              <button onClick={addQuestion} className="bg-gray-200 px-3 py-1 rounded mr-3 mb-4">
+                + Add Question
+              </button>
 
-      
-      {activeTab === 'training' && (
-        <>
-          <h2 className="text-2xl font-semibold mb-4">Employee Training Requests</h2>
-          {trainingRequests.length === 0 ? (
-            <p className="text-gray-500">No training requests submitted yet.</p>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full bg-white border text-sm">
-                <thead>
-                  <tr className="bg-gray-100 text-left">
-                    <th className="px-4 py-2 border">Employee</th>
-                    <th className="px-4 py-2 border">Department</th>
-                    <th className="px-4 py-2 border">Status</th>
-                    <th className="px-4 py-2 border">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {trainingRequests.map((req) => (
-                    <tr key={req._id}>
-                      <td className="px-4 py-2 border">{req.user?.name}</td>
-                      <td className="px-4 py-2 border">{req.user?.department}</td>
-                      <td className="px-4 py-2 border">
-                        <span
-                          className={`px-2 py-1 rounded font-semibold ${
-                            req.status === 'Approved'
-                              ? 'bg-green-100 text-green-700'
-                              : req.status === 'Rejected'
-                              ? 'bg-red-100 text-red-700'
-                              : 'bg-yellow-100 text-yellow-700'
-                          }`}
-                        >
-                          {req.status}
-                        </span>
-                      </td>
-                      <td className="px-4 py-2 border space-x-2">
-                        <button onClick={() => updateStatus(req._id, 'Approved')} className="bg-green-500 text-white px-2 py-1 rounded">
-                          Approve
-                        </button>
-                        <button onClick={() => updateStatus(req._id, 'Rejected')} className="bg-red-500 text-white px-2 py-1 rounded">
-                          Reject
-                        </button>
-                        <button onClick={() => setSelectedRequest(req)} className="text-blue-600 underline hover:text-blue-800">
-                          View
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+              <h3 className="text-lg font-semibold mb-2">Assign to Users by Role & Department:</h3>
+              <div className="max-h-40 overflow-y-auto border p-2 mb-6 rounded">
+                {users.map((user) => (
+                  <label key={user._id} className="block mb-1">
+                    <input
+                      type="checkbox"
+                      checked={selectedUsers.includes(user._id)}
+                      onChange={() => toggleUser(user._id)}
+                      className="mr-2"
+                    />
+                    {user.name} — {user.role} ({user.department})
+                  </label>
+                ))}
+              </div>
+
+              <button
+                onClick={createSurvey}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded"
+              >
+                ✅ Create Feedback Form
+              </button>
+
+              <hr className="my-8" />
+              <h2 className="text-2xl font-semibold mb-4">📄 Created Feedback Forms</h2>
+              <ul className="space-y-3">
+                {surveys.map((survey) => (
+                  <li key={survey._id} className="border p-3 rounded flex justify-between items-center bg-white">
+                    <div>
+                      <div className="text-lg font-medium text-gray-800">{survey.title}</div>
+                      <div className="text-sm text-gray-600">
+                        Assigned: {survey.assignedTo?.length || 0} | Responses: {survey.responseCount || 0}
+                      </div>
+                    </div>
+                    <Link to={`/survey/${survey._id}/responses`} className="text-sm text-blue-600 hover:underline">
+                      View Responses
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </>
           )}
-        </>
-      )}
 
-      
+          {/* Training Tab */}
+          {activeTab === 'training' && (
+          <>
+            <h2 className="text-3xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+              📋 Employee Training Requests
+            </h2>
+            {trainingRequests.length === 0 ? (
+              <p className="text-gray-500 italic text-center">No training requests submitted yet.</p>
+            ) : (
+              <div className="overflow-x-auto shadow rounded-lg">
+                <table className="min-w-full bg-white text-sm text-gray-800 border border-gray-200">
+                  <thead className="bg-gray-100 text-xs uppercase font-semibold tracking-wide text-gray-600">
+                    <tr>
+                      <th className="px-5 py-3 text-left border-b">Employee</th>
+                      <th className="px-5 py-3 text-left border-b">Department</th>
+                      <th className="px-5 py-3 text-left border-b">Role</th>
+                      <th className="px-5 py-3 text-left border-b">Status</th>
+                      <th className="px-5 py-3 text-left border-b">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {trainingRequests.map((req) => {
+                      const { label, color } = formatStatus(req.status);
+                      return (
+                        <tr key={req._id} className="hover:bg-gray-50 transition">
+                          <td className="px-5 py-3 border-b">{req.user?.name}</td>
+                          <td className="px-5 py-3 border-b">{req.user?.department}</td>
+                          <td className="px-5 py-3 border-b">{req.user?.role}</td>
+                          <td className="px-5 py-3 border-b">
+                            <span className={`px-3 py-1 text-xs rounded-full font-semibold ${color}`}>
+                              {label}
+                            </span>
+                          </td>
+                          <td className="px-5 py-3 border-b space-x-2">
+                            <button
+                              onClick={() => updateStatus(req._id, 'approve')}
+                              className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded shadow-sm transition"
+                            >
+                              Approve
+                            </button>
+                            <button
+                              onClick={() => updateStatus(req._id, 'reject')}
+                              className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded shadow-sm transition"
+                            >
+                              Reject
+                            </button>
+                            <button
+                              onClick={() => setSelectedRequest(req)}
+                              className="text-indigo-600 hover:text-indigo-800 font-medium"
+                            >
+                              View
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </>
+      )}
+      </div>
+
+      {/* Modal for Request Details */}
       {selectedRequest && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
-          <div className="bg-white p-6 rounded shadow-lg max-w-4xl w-full overflow-y-auto max-h-[90vh]">
-            <h3 className="text-xl font-semibold mb-4">Training Request Details</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
+          <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <h3 className="text-2xl font-bold mb-4 text-center text-gray-800">
+              📝 Training Request Details
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
               <p><strong>Employee:</strong> {selectedRequest.user?.name}</p>
               <p><strong>Department:</strong> {selectedRequest.user?.department}</p>
               <p><strong>Location:</strong> {selectedRequest.user?.location}</p>
-              <p><strong>Status:</strong> {selectedRequest.status}</p>
+              <p><strong>Status:</strong> {formatStatus(selectedRequest.status).label}</p>
               <p><strong>General Skills:</strong> {selectedRequest.generalSkills}</p>
               <p><strong>Tools Training:</strong> {selectedRequest.toolsTraining}</p>
               <p><strong>Soft Skills:</strong> {selectedRequest.softSkills}</p>
@@ -257,7 +313,7 @@ export default function AdminPanel() {
             <div className="text-right mt-6">
               <button
                 onClick={() => setSelectedRequest(null)}
-                className="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400"
+                className="bg-gray-300 hover:bg-gray-400 text-black px-4 py-2 rounded transition"
               >
                 Close
               </button>
@@ -266,5 +322,5 @@ export default function AdminPanel() {
         </div>
       )}
     </div>
-  );
+  )
 }

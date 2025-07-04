@@ -1,29 +1,35 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-export default function EmployeeNavbar({ fetchSurveys }) {
+export default function EmployeeNavbar({ fetchSurveys, onLogout }) {
   return (
-    <nav className="bg-gray-800 text-white px-6 py-4 flex justify-between items-center">
+    <nav className="bg-gray-800 text-white px-6 py-4 flex justify-between items-center shadow-md">
       <h1 className="text-xl font-bold">Employee Dashboard</h1>
-      <div className="flex gap-4">
+      <div className="flex gap-4 items-center">
         <Link
           to="/training-request"
-          className="bg-green-500 px-4 py-2 rounded hover:bg-green-600"
+          className="bg-green-500 hover:bg-green-600 px-4 py-2 rounded"
         >
           Training Request
         </Link>
-        <button
-          onClick={fetchSurveys}
-          className="bg-blue-500 px-4 py-2 rounded hover:bg-blue-600"
-        >
-          View Feedback Forms
-        </button>
         <Link
           to="/my-training-requests"
-          className="bg-yellow-500 px-4 py-2 rounded hover:bg-yellow-600"
+          className="bg-yellow-500 hover:bg-yellow-600 px-4 py-2 rounded"
         >
-          My Training Requests
+          My Requests
         </Link>
+        <Link
+          to="/profile"
+          className="bg-purple-500 hover:bg-purple-600 px-4 py-2 rounded"
+        >
+          Profile
+        </Link>
+        <button
+          onClick={onLogout}
+          className="bg-red-500 hover:bg-red-600 px-4 py-2 rounded"
+        >
+          Logout
+        </button>
       </div>
     </nav>
   );

@@ -31,7 +31,7 @@ export default function AdminResponses() {
         Email: resp.userId?.email || 'N/A',
       };
       questions.forEach((question, i) => {
-        row[question] = resp.answers[i] || 'No Answer'
+        row[question] = resp.answers[i] || 'No Answer';
       });
       return row;
     });
@@ -47,45 +47,55 @@ export default function AdminResponses() {
     document.body.removeChild(link);
   };
 
-  if (loading) return <div className="p-6 text-center text-gray-500">Loading responses...</div>;
+  if (loading) return <div className="p-6 text-center text-gray-500 text-lg">Loading responses...</div>;
 
   return (
-    <div className="max-w-6xl mx-auto p-6">
+    <div className="max-w-7xl mx-auto p-6 bg-gray-50 min-h-screen">
+      {/* Header */}
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-3xl font-bold text-gray-800">Submitted Responses</h2>
-        <Link to="/admin" className="text-blue-600 underline hover:text-blue-800">
+        <h2 className="text-3xl font-bold text-gray-800">📊 Submitted Survey Responses</h2>
+        <Link to="/admin" className="text-blue-600 font-medium hover:underline">
           ← Back to Admin Panel
         </Link>
       </div>
 
-      {responses.length === 0 ? (
-        <p className="text-gray-600">No responses submitted yet.</p>
-      ) : (
-        <>
+      {/* Export Button */}
+      {responses.length > 0 && (
+        <div className="mb-4 text-right">
           <button
             onClick={exportToCSV}
-            className="mb-4 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
+            className="inline-flex items-center bg-green-600 hover:bg-green-700 text-white font-semibold px-5 py-2 rounded shadow"
           >
-            Export to CSV
+            ⬇ Export to CSV
           </button>
+        </div>
+      )}
 
-          <table className="w-full table-auto border-collapse border border-gray-300">
-            <thead className="bg-gray-100">
+      {/* No Data */}
+      {responses.length === 0 ? (
+        <p className="text-gray-600 text-center">No responses submitted yet.</p>
+      ) : (
+        <div className="overflow-x-auto rounded-lg shadow border bg-white">
+          <table className="min-w-full table-auto text-sm text-left">
+            <thead className="bg-gray-100 border-b">
               <tr>
-                <th className="border px-4 py-2 text-left">Employee</th>
-                <th className="border px-4 py-2 text-left">Email</th>
-                <th className="border px-4 py-2 text-left">Feedback</th>
+                <th className="px-6 py-3 text-gray-700 font-semibold">Employee</th>
+                <th className="px-6 py-3 text-gray-700 font-semibold">Email</th>
+                <th className="px-6 py-3 text-gray-700 font-semibold">Feedback</th>
               </tr>
             </thead>
             <tbody>
               {responses.map((resp, i) => (
-                <tr key={i} className="border-b">
-                  <td className="border px-4 py-2">{resp.userId?.name || 'N/A'}</td>
-                  <td className="border px-4 py-2">{resp.userId?.email || 'N/A'}</td>
-                  <td className="border px-4 py-2">
-                    <ul className="list-disc ml-5">
+                <tr key={i} className="border-b hover:bg-gray-50 transition">
+                  <td className="px-6 py-4 text-gray-800">{resp.userId?.name || 'N/A'}</td>
+                  <td className="px-6 py-4 text-gray-700">{resp.userId?.email || 'N/A'}</td>
+                  <td className="px-6 py-4 text-gray-700">
+                    <ul className="list-disc ml-5 space-y-1">
                       {questions.map((q, idx) => (
-                        <li key={idx}><strong>{q} </strong>: {resp.answers[idx] || 'No Answer'}</li>
+                        <li key={idx}>
+                          <strong className="text-gray-800">{q}:</strong>{' '}
+                          <span className="text-gray-600">{resp.answers[idx] || 'No Answer'}</span>
+                        </li>
                       ))}
                     </ul>
                   </td>
@@ -93,7 +103,7 @@ export default function AdminResponses() {
               ))}
             </tbody>
           </table>
-        </>
+        </div>
       )}
     </div>
   );

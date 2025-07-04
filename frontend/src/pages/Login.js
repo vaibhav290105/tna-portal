@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import API from '../services/api';
 import { useNavigate, Link } from 'react-router-dom';
-import { jwtDecode } from "jwt-decode";
+import { jwtDecode } from 'jwt-decode';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -18,12 +18,16 @@ export default function Login() {
 
       const decoded = jwtDecode(token);
       const role = decoded.role;
+      const name = decoded.name;
 
-      localStorage.setItem('name', res.data.name);
       localStorage.setItem('role', role);
+      localStorage.setItem('name', name);
 
+      // Role-based redirection
       if (role === 'admin') {
         navigate('/admin');
+      } else if (role === 'manager') {
+        navigate('/manager');
       } else {
         navigate('/dashboard');
       }

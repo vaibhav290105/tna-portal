@@ -9,6 +9,7 @@ import AdminResponses from './pages/AdminResponses';
 import TrainingForm from './pages/TrainingForm';
 import MyTrainingRequests from './pages/MyTrainingRequests';
 import ManagerPanel from './pages/ManagerPanel';
+import Profile from './pages/Profile';
 
 
 
@@ -25,6 +26,7 @@ function App() {
         <Route path="/training-request" element={<TrainingForm />} />
         <Route path="/my-training-requests" element={<MyTrainingRequests />} />
         <Route path="/manager" element={<ManagerPanel />} />
+        <Route path="/profile" element={<Profile />} />
 
       </Routes>
     </BrowserRouter>

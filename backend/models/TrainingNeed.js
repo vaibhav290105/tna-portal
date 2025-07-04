@@ -40,7 +40,14 @@ const TrainingNeedSchema = new mongoose.Schema({
 
   status: {
   type: String,
-  enum: ['Pending_Manager', 'Rejected_By_Manager', 'Approved_By_Manager', 'Approved_By_Admin', 'Rejected_By_Admin'],
+  enum: [
+    'Pending_Manager',
+    'Rejected_By_Manager',
+    'Approved_By_Manager',
+    'Pending_Admin',
+    'Approved_By_Admin',
+    'Rejected_By_Admin'
+  ],
   default: 'Pending_Manager'
 },
 submittedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },

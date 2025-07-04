@@ -36,14 +36,20 @@ router.post('/login', async (req, res) => {
   const match = await bcrypt.compare(password, user.password);
   if (!match) return res.status(400).json({ msg: 'Invalid credentials' });
 
-  const token = jwt.sign({ id: user._id, role: user.role, name: user.name, department: user.department }, process.env.JWT_SECRET);
-  res.json({ token, role: user.role, name: user.name, department: user.department});
+  const token = jwt.sign({ id: user._id, role: user.role, name: user.name, department: user.department, location:user.location }, process.env.JWT_SECRET);
+  res.json({ token, role: user.role, name: user.name, department: user.department, location: user.location, role:user.role});
 });
 
 router.get('/users', auth, async (req, res) => {
   if (req.user.role !== 'admin') return res.status(403).send('Forbidden');
   const users = await User.find({}, 'name email role department');
   res.json(users);
+});
+
+
+router.get('/me', auth, async (req, res) => {
+  const user = await User.findById(req.user._id).select('-password');
+  res.json(user);
 });
 
 
