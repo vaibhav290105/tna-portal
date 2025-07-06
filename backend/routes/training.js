@@ -39,7 +39,8 @@ router.get('/all', auth, async (req, res) => {
 
     if (req.user.role === 'admin') {
       requests = await TrainingNeed.find({
-        status: { $in: ['Approved_By_Manager', 'Pending_Admin'] }
+        status: { $in: ['Approved_By_Manager', 'Pending_Admin'] },
+        department: req.user.department
       })
         .populate('user', 'name email department role')
         .sort({ createdAt: -1 });
@@ -86,7 +87,7 @@ router.put('/update-status/:id', auth, async (req, res) => {
 router.get('/my-requests', auth, async (req, res) => {
   try {
     const requests = await TrainingNeed.find({ user: req.user.id })
-      .populate('user', 'name department location') // add this line
+      .populate('user', 'name department location')
       .sort({ createdAt: -1 });
     res.json(requests);
   } catch (err) {
@@ -130,7 +131,8 @@ router.get('/admin-review', auth, async (req, res) => {
   if (req.user.role !== 'admin') return res.status(403).send('Forbidden');
 
   const requests = await TrainingNeed.find({
-    status: { $in: ['Approved_By_Manager', 'Pending_Admin'] }
+    status: { $in: ['Approved_By_Manager', 'Pending_Admin'] },
+    department: req.user.department
   }).populate('user', 'name department role');
 
   res.json(requests);
